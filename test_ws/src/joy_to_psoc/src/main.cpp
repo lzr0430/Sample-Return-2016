@@ -24,7 +24,12 @@ uint16_t makeserialpacket(unsigned char cmd,unsigned char intensity)
         rtn = rtn & 0x0f00;
     }
     rtn |= intensity; //ex. intensity = 0xff; rtn = 0x08FF
-    return ((rtn <<4) &0xfff0); //returns 0x8FF0
+    rtn = (rtn <<4) & 0xfff0;//rtn is now 0x8FF0
+    //Checksum is the bitwise addition of the 3 nibbles with the overflow discarded. (cmd, int high, int low)
+    //in our example, this would be (0x8 + 0xf + 0xf) or (0b1000 + 0b1111 + 0b1111) = 0b0110 or 0x6
+    unsigned char chksm = (((intensity & 0x0f)+((intensity >>4)&0x0f) + (cmd&0x0f))&0x0f);
+    rtn = rtn | chksm; //rtn is 0x8FF6
+    return rtn; 
 }
 int16_t axispos = 0; //Axis Position as of last joystick reading, rounded to be between [-255,255]
 int16_t prevaxispos = 0; //used to prevent repeats.
