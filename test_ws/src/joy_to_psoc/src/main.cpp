@@ -82,12 +82,10 @@ int main(int argc,char** argv)
     {
         if (read(tty_fd,&c,1)>0)
         {
-            ROS_INFO("%c",c);
             std_msgs::String msg;
-            char d[2];
-            d[0]=c;
-            d[1]='\0';
-            msg.data = d;
+            msg.data.push_back(c);
+            while((read(tty_fd,&c,1)>0))
+                    msg.data.push_back(c); //Get the whole message before publishing.
             publisher.publish(msg);              // if new data is available on the serial port, print it out
         }
         if(axispos)
